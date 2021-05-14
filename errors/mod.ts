@@ -2,7 +2,7 @@
 
 /** Re-export Deno.errors and http errors as neunit errors
  * 
- * Deno.errors.Http is replaced by http-errors from 
+ * Deno.errors.Http is replaced by http-errors from [@curveball/http-errors](https://github.com/curveball/http-errors).
  */
 
 import { HttpProblem, InternalServerError, isHttpProblem, BadRequest } from "./deps.ts";
