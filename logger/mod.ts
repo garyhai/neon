@@ -2,12 +2,12 @@
 
 // TODO: Add more commands: add handlers, add loggers, change settings.
 
-import { setup, LevelName, LoggerConfig, getLogger, LogConfig, handlers as LogHandlers, info, warning, error, critical, debug, Logger } from "https://deno.land/std@0.96.0/log/mod.ts";
-import { LogRecord } from "https://deno.land/std@0.96.0/log/logger.ts";
-import { format } from "https://deno.land/std@0.96.0/datetime/mod.ts";
+import { setup, LevelName, LoggerConfig, getLogger, LogConfig, handlers as LogHandlers, info, warning, error, critical, debug, Logger } from "https://deno.land/std/log/mod.ts";
+import { LogRecord } from "https://deno.land/std/log/logger.ts";
+import { format } from "https://deno.land/std/datetime/mod.ts";
 import { Edge, Vertex, toVertex, toArray } from "../deepgraph/mod.ts";
 
-export const log = {info, warning, error, critical, debug};
+export const log = { info, warning, error, critical, debug };
 export { LoggerConfig, Logger };
 export type { LevelName };
 
@@ -15,8 +15,8 @@ const { FileHandler, RotatingFileHandler, ConsoleHandler } = LogHandlers;
 
 type FormatterFunction = (logRecord: LogRecord) => string;
 interface BaseHandlerConfig {
-    id: string;
-    level: LevelName;
+    id?: string;
+    level?: LevelName;
     datetime?: string;
     formatter?: string | FormatterFunction;
 }
@@ -95,7 +95,7 @@ export class LoggersManager implements Edge {
         if (config != undefined) {
             newConfig = { ...newConfig, ...config };
         }
-        
+
         const logConfig = {
             loggers: newConfig.loggers,
             handlers: makeHandlers(newConfig.handlers)
@@ -137,8 +137,8 @@ function formatter(logRecord: LogRecord, tpl: string, ldml?: string): string {
     return tpl.replace(/{(\w+)}/g, (match, p1): string => {
         const value = logRecord[p1 as keyof LogRecord];
         // do not interpolate missing values
-        if (value == null) return match;  
+        if (value == null) return match;
         if (value instanceof Date && ldml) return format(value, ldml);
         return String(value);
-      });
+    });
 }

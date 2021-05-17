@@ -1,6 +1,6 @@
 // Copyright 2021 the Neunit team. All rights reserved. MIT license.
 
-import { assertEquals, assertThrows, assertThrowsAsync } from "https://deno.land/std@0.96.0/testing/asserts.ts";
+import { assertEquals, assertThrows, assertThrowsAsync } from "https://deno.land/std/testing/asserts.ts";
 import { Edge } from "./mod.ts";
 
 interface Options {

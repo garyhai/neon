@@ -1,6 +1,6 @@
 // Copyright 2021 the Neunit team. All rights reserved. MIT license.
 
-import { assert, assertEquals, assertThrows } from "https://deno.land/std@0.96.0/testing/asserts.ts";
+import { assert, assertEquals, assertThrows } from "https://deno.land/std/testing/asserts.ts";
 import { Http, NotFound, toHttpError, Busy } from "./mod.ts";
 
 Deno.test("neunit errors", () => {
