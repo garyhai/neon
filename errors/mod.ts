@@ -27,6 +27,20 @@ export const {
     Busy
 } = Deno.errors;
 
+export class Unknown extends InvalidData {
+    constructor(msg?: string) {
+        super(msg);
+        this.name = "Unknown";
+      }  
+}
+
+export class Unavailable extends NotFound {
+    constructor(msg?: string) {
+        super(msg);
+        this.name = "Unavailable";
+      }  
+}
+
 /** Convert common error to HTTP server error or HTTP client error */
 export function toHttpError<E extends Error>(err: E, isClient = false): HttpProblem {
     if (isHttpProblem(err)) return err;

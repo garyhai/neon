@@ -2,9 +2,9 @@
 
 // TODO: Add more commands: add handlers, add loggers, change settings.
 
-import { setup, LevelName, LoggerConfig, getLogger, LogConfig, handlers as LogHandlers, info, warning, error, critical, debug, Logger } from "https://deno.land/std/log/mod.ts";
-import { LogRecord } from "https://deno.land/std/log/logger.ts";
-import { format } from "https://deno.land/std/datetime/mod.ts";
+import { setup, LevelName, LoggerConfig, getLogger, LogConfig, handlers as LogHandlers, info, warning, error, critical, debug, Logger } from "https://deno.land/std@0.96.0/log/mod.ts";
+import { LogRecord } from "https://deno.land/std@0.96.0/log/logger.ts";
+import { format } from "https://deno.land/std@0.96.0/datetime/mod.ts";
 import { Edge, Vertex, toVertex, toArray } from "../deepgraph/mod.ts";
 
 export const log = { info, warning, error, critical, debug };
