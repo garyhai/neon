@@ -1,7 +1,8 @@
 // Copyright 2021 the Neunit team. All rights reserved. Neunit licence.
 
 import { Edge } from "../deepgraph/mod.ts";
-import { AlreadyExists, BadResource, Unavailable, Unknown } from "../errors/mod.ts";
+import { AlreadyExists, Unavailable, Unknown } from "../errors/mod.ts";
+import { loadDefault, Options } from "./mod.ts";
 
 /** 默认导出的构建函数。与其他模块不同的是，Boot模块没有根域。 */
 export default function startup(args?: string | BootConfig): Edge {
@@ -10,7 +11,7 @@ export default function startup(args?: string | BootConfig): Edge {
 
 export interface BootConfig {
     starter?: string;
-    config?: string | Record<string, unknown>;
+    config?: string | Options;
 }
 
 /** Boot 也是一个deepedge，只是没有根域。 */
@@ -29,7 +30,7 @@ export class Boot implements Edge {
         }
         // 传入配置参数优先级最高，其次是命令行参数中的配置文件路径，最后是环境变量。
         this.#bootConfig.config ??= Deno.args[1] ?? Deno.env.get("NEUNIT_CONFIG_FILE") ?? "neunit.json";
-        this.#bootConfig.starter ??= Deno.args[2] ?? Deno.env.get("NEUNIT_STARTER") ?? "./boot/root.ts";
+        this.#bootConfig.starter ??= Deno.args[2] ?? Deno.env.get("NEUNIT_STARTER") ?? "./root/boot.ts";
     }
 
     /** 如果config参数不为空，则会覆盖原有配置项。这个设计是为了未来能够在运行时动态启动。*/
@@ -48,7 +49,7 @@ export class Boot implements Edge {
         }
 
         // 获取loader模块路径
-        const starter = bc.starter ?? "./boot/root.ts";
+        const starter = bc.starter ?? "./root/boot.ts";
         const createStarter = await loadDefault(starter);
         this.#starter = createStarter(config) as Edge;
         // 启动starter，并移交控制权。
@@ -73,11 +74,4 @@ export class Boot implements Edge {
         }
         throw new Unknown(`unknown coomand: ${command}`);
     }
-}
-
-// deno-lint-ignore no-explicit-any
-export async function loadDefault(modPath: string): Promise<any> {
-    const { default: module } = await import(modPath);
-    if (module === undefined) throw new BadResource("no default export");
-    return module;
 }

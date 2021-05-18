@@ -2,9 +2,8 @@
 
 import { v4 as uuid } from "https://deno.land/std@0.97.0/uuid/mod.ts";
 import { isEdge, Edge } from "../deepgraph/mod.ts";
-import { PermissionDenied, Unavailable, Unknown } from "../errors/mod.ts";
+import { BadResource, PermissionDenied, Unavailable, Unknown } from "../errors/mod.ts";
 import { log } from "../logger/mod.ts";
-import { loadDefault } from "./mod.ts";
 
 /** Vertex构建函数接口。 */
 export interface Builder {
@@ -25,7 +24,7 @@ export default function startup(args?: RootConfig): Edge {
     return new Root(args);
 }
 
-interface Options {
+export interface Options {
     [index: string]: unknown;
 }
 
@@ -137,4 +136,12 @@ export class Root implements Edge {
         }
         throw new Unknown(`unknown intent: ${command}`);
     }
+}
+
+
+// deno-lint-ignore no-explicit-any
+export async function loadDefault(modPath: string): Promise<any> {
+    const { default: module } = await import(modPath);
+    if (module === undefined) throw new BadResource("no default export");
+    return module;
 }
