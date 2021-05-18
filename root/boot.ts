@@ -1,8 +1,8 @@
 // Copyright 2021 the Neunit team. All rights reserved. Neunit licence.
 
 import { Edge } from "../deepgraph/mod.ts";
-import { AlreadyExists, Unavailable, Unknown } from "../errors/mod.ts";
-import { loadDefault, Options } from "./mod.ts";
+import { AlreadyExists, Unavailable, Unknown, Forbidden } from "../errors/mod.ts";
+import { load, Settings } from "./mod.ts";
 
 /** 默认导出的构建函数。与其他模块不同的是，Boot模块没有根域。 */
 export default function startup(args?: string | BootConfig): Edge {
@@ -11,7 +11,7 @@ export default function startup(args?: string | BootConfig): Edge {
 
 export interface BootConfig {
     starter?: string;
-    config?: string | Options;
+    config?: string | Settings;
 }
 
 /** Boot 也是一个deepedge，只是没有根域。 */
@@ -45,12 +45,12 @@ export class Boot implements Edge {
 
         // 加载配置文件，json, js, 或者ts。
         if (typeof bc.config === "string") {
-            bc.config = await loadDefault(bc.config);
+            bc.config = await load(bc.config);
         }
 
         // 获取loader模块路径
         const starter = bc.starter ?? "./root/boot.ts";
-        const createStarter = await loadDefault(starter);
+        const createStarter = await load(starter);
         this.#starter = createStarter(config) as Edge;
         // 启动starter，并移交控制权。
         return this.#starter.invoke("initialize");
@@ -73,5 +73,13 @@ export class Boot implements Edge {
                 return this.start(args);
         }
         throw new Unknown(`unknown coomand: ${command}`);
+    }
+
+    get() {
+        throw new Forbidden;
+    }
+
+    set(_v: unknown) {
+        throw new Forbidden;
     }
 }

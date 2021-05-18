@@ -2,7 +2,7 @@
 
 import { v4 as uuid } from "https://deno.land/std@0.97.0/uuid/mod.ts";
 import { isEdge, Edge } from "../deepgraph/mod.ts";
-import { BadResource, PermissionDenied, Unavailable, Unknown } from "../errors/mod.ts";
+import { Forbidden, NotFound, Unavailable, Unknown } from "../errors/mod.ts";
 import { log } from "../logger/mod.ts";
 
 /** Vertex构建函数接口。 */
@@ -24,7 +24,7 @@ export default function startup(args?: RootConfig): Edge {
     return new Root(args);
 }
 
-export interface Options {
+export interface Settings {
     [index: string]: unknown;
 }
 
@@ -35,14 +35,14 @@ export interface RootConfig {
     /** 持久化静态数据存储库，通常是数据库。默认直接使用配置对象 */
     loader?: string;
     /** loader configuration */
-    loaderConfig?: Options | string;
+    loaderConfig?: Settings | string;
     /** 预加载的模块列表。默认还会从静态配置中加载带有"_id"属性的对象 */
     preloads?: string[];
 }
 
 const DEFAULT_CONFIG: RootConfig = {
-    loader: "./basic_loader.ts",
-    loaderConfig: "basic_loader.json",
+    loader: "./loader.ts",
+    loaderConfig: "modules.json",
 };
 
 /** 整个Deepgraph的根。也是系统的初始位置。运行中各个模块可以设定自己的根。 */
@@ -62,7 +62,7 @@ export class Root implements Edge {
     async initialize(): Promise<Edge> {
         let config;
         if (typeof this.#config.loaderConfig === "string") {
-            config = await loadDefault(this.#config.loaderConfig);
+            config = await load(this.#config.loaderConfig);
         } else {
             config = this.#config.loaderConfig;
         }
@@ -71,8 +71,9 @@ export class Root implements Edge {
             config["token"] ??= this.#config.token;
         }
         const loaderPath = config["module"] ?? this.#config.loader;
-        const init = await loadDefault(loaderPath);
-        const loader = await init(config, this);
+        const forge = await load(loaderPath);
+        const loader = await forge(config, this);
+        await loader.invoke("initialize");
         this.#loader = loader;
         for (const preload of config.preloads) {
             await loader.invoke("load", preload);
@@ -94,11 +95,11 @@ export class Root implements Edge {
      * @param key 注册的全局ID。不提供时，自动生成uuid作为新的key，并返回该key。
      * @returns 注册成功返回注册时的id；注销成功返回true；注销失败返回false。
      */
-    set(value: Registration | undefined, key?: string): string | boolean {
-        if (value === undefined) return this.#registry.delete(key as string);
-        const { vertex, id, token } = value;
+    set(value: Registration | string | undefined, key?: string): string | boolean {
+        if (value === this.#config.token) return this.#registry.delete(key as string);
+        const { vertex, id, token } = value as Registration;
         if (token !== this.#config.token) {
-            throw new PermissionDenied("token is invalid");
+            throw new Forbidden("token is invalid");
         }
         key ??= id ?? uuid.generate();
         this.#registry.set(key as string, vertex);
@@ -110,7 +111,7 @@ export class Root implements Edge {
      * @param options 承载额外的参数，注册时通常会有token和key值。
      * @returns 异步返回各种调用的结果。这里强制要求返回的数据具备Edge接口。
      */
-    async invoke(command: string, data?: string | Edge | Registration, options?: Options): Promise<unknown> {
+    async invoke(command: string, data?: string | Edge | Registration, options?: Settings): Promise<unknown> {
         switch (command) {
             case "get":
             case "load": {
@@ -130,7 +131,8 @@ export class Root implements Edge {
             }
             case "delete":
             case "deregister": {
-                return this.set(undefined, data as string);
+                const { token } = options ?? {};
+                return this.set(token as string, data as string);
             }
             case "initialize": return await this.initialize();
         }
@@ -140,8 +142,9 @@ export class Root implements Edge {
 
 
 // deno-lint-ignore no-explicit-any
-export async function loadDefault(modPath: string): Promise<any> {
-    const { default: module } = await import(modPath);
-    if (module === undefined) throw new BadResource("no default export");
-    return module;
+export async function load(modPath: string, varName = "default"): Promise<any> {
+    const module = await import(modPath);
+    const v = module[varName];
+    if (v === undefined) throw new NotFound(`${varName} is not exported from ${modPath}`);
+    return v;
 }

@@ -15,9 +15,9 @@
  */
 export interface Edge {
     /** 获取edge中的数据，path可以是数组用于获取更深层次的数据。 */
-    get?(path?: unknown): unknown;
+    get(path?: unknown): unknown;
     /** 设置数据。Edge对象可以自行解释value内容。path是可选的层次数据结构操作路径。 */
-    set?(value: unknown, path?: unknown): unknown;
+    set(value: unknown, path?: unknown): unknown;
     /** 异步操作
      * 
      * 相对于get/set的同步数据操作，invoke是通用的异步函数调用。
@@ -257,7 +257,11 @@ export function toVertex(x: any): Vertex {
 /** 当前只根据函数中是否有 invoke 函数来判定，过于简单粗暴。 */
 export function isEdge(x: any): x is Edge {
     if (x == null) return false;
-    return (typeof x["invoke"] === "function");
+    return (
+        typeof x["get"] === "function" &&
+        typeof x["set"] === "function" &&
+        typeof x["invoke"] === "function"
+    );
 }
 
 /** 用于判断变量是否为空值（不仅仅是null）
