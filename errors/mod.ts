@@ -48,6 +48,21 @@ export class Unavailable extends NotFound {
       }  
 }
 
+export class Unimplemented extends NotFound {
+    constructor(msg?: string) {
+        super(msg);
+        this.name = "Unimplemented";
+      }  
+}
+
+export class Forbidden extends PermissionDenied {
+    constructor(msg?: string) {
+        super(msg);
+        this.name = "Forbidden";
+      }  
+}
+
+
 /** Convert common error to HTTP server error or HTTP client error */
 export function toHttpError<E extends Error>(err: E, isClient = false): HttpProblem {
     if (isHttpProblem(err)) return err;
