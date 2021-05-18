@@ -1,7 +1,7 @@
 // Copyright 2021 the Neunit team. All rights reserved. Neunit licence.
 
 import { Edge } from "../deepgraph/mod.ts";
-import { AlreadyExists, InvalidData, Unavailable, Unknown} from "../errors/mod.ts";
+import { AlreadyExists, Unavailable, Unknown } from "../errors/mod.ts";
 
 /** 默认导出的构建函数。与其他模块不同的是，Boot模块没有根域。 */
 export default function startup(args?: string | BootConfig): Edge {
@@ -9,56 +9,51 @@ export default function startup(args?: string | BootConfig): Edge {
 }
 
 export interface BootConfig {
-    name?: string;
-    loader?: string;
-    preloads?: string[];
-    [name: string]: unknown;
+    starter?: string;
+    config?: string | Record<string, unknown>;
 }
 
 /** Boot 也是一个deepedge，只是没有根域。 */
 export class Boot implements Edge {
     // 系统实例
-    #loader?: Edge;
+    #starter?: Edge;
     // 内部配置
-    #cfgFile?: string;
-    #config?: BootConfig;
+    #bootConfig: BootConfig = {};
 
     /** 构造时要传入解析好的配置。*/
     constructor(config?: string | BootConfig) {
-        // 传入配置参数优先级最高，其次是命令行参数中的配置文件路径，最后是环境变量。
-        config ??= Deno.args[2];
-        config ??= Deno.env.get("NE_CONFIG_FILE") ?? "neunit.json";
         if (typeof config === "string") {
-            this.#cfgFile = config;
-        } else {
-            this.#config = config;
+            this.#bootConfig.config = config;
+        } else if (config) {
+            this.#bootConfig = config;
         }
+        // 传入配置参数优先级最高，其次是命令行参数中的配置文件路径，最后是环境变量。
+        this.#bootConfig.config ??= Deno.args[1] ?? Deno.env.get("NEUNIT_CONFIG_FILE") ?? "neunit.json";
+        this.#bootConfig.starter ??= Deno.args[2] ?? Deno.env.get("NEUNIT_STARTER") ?? "./boot/registrar.ts";
     }
 
     /** 如果config参数不为空，则会覆盖原有配置项。这个设计是为了未来能够在运行时动态启动。*/
     async start(config?: string | BootConfig): Promise<unknown> {
-        if (this.#loader) throw new AlreadyExists("Already started");
+        if (this.#starter) throw new AlreadyExists("Already started");
+        let bc = this.#bootConfig;
         if (typeof config === "string") {
-            this.#cfgFile = config;
-            this.#config = undefined;
+            bc.config = config;
         } else if (config) {
-            this.#config = config;
-            this.#cfgFile = undefined;
+            bc = config;
         }
 
         // 加载配置文件，json, js, 或者ts。
-        if (this.#config === undefined) {
-            const { default: cfg } = await import(this.#cfgFile as string);
-            this.#config = cfg;
+        if (typeof bc.config === "string") {
+            const { default: cfg } = await import(bc.config);
+            bc.config = cfg;
         }
-        if (this.#config == undefined) throw new InvalidData;
 
         // 获取loader模块路径
-        const loader = this.#config.loader ?? "./boot/loader.ts";
-        const { default: createLoader } = await import(loader);
-        this.#loader = createLoader(config) as Edge;
-        // 启动root，并移交控制权。
-        return this.#loader.invoke("initialize");
+        const starter = bc.starter ?? "./boot/registrar.ts";
+        const { default: createStarter } = await import(starter);
+        this.#starter = createStarter(config) as Edge;
+        // 启动starter，并移交控制权。
+        return this.#starter.invoke("initialize");
     }
 
     /** 命令处理。主要是启动停止相关。其中deepedge约定俗成的initialize与start命令等效。 */
@@ -68,36 +63,15 @@ export class Boot implements Edge {
             case "start":
                 return this.start(args);
             case "stop": {
-                if (!this.#loader) throw new Unavailable("system is not started");
-                const loader = this.#loader;
-                this.#loader = undefined;
-                return loader.invoke("stop");
+                if (!this.#starter) throw new Unavailable("system is not started");
+                const starter = this.#starter;
+                this.#starter = undefined;
+                return starter.invoke("stop");
             }
             case "restart":
-                if (this.#loader) await this.#loader.invoke("stop");
+                if (this.#starter) await this.#starter.invoke("stop");
                 return this.start(args);
         }
         throw new Unknown(`unknown coomand: ${command}`);
-    }
-
-    /** 代理访问内部的配置 */
-    get(key?: string): unknown {
-        if (key == undefined) return this.#config;
-        if (this.#config) return this.#config[key];
-        return undefined;
-    }
-
-    /** 代理设置内部的配置项 */
-    set(value: unknown, key?: string): unknown {
-        let res;
-        if (key === undefined) {
-            res = this.#config;
-            this.#config = value as BootConfig;
-        } else {
-            this.#config ??= {};
-            res = this.#config[key];
-            this.#config[key] = value;
-        }
-        return res;
     }
 }

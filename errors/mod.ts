@@ -27,6 +27,13 @@ export const {
     Busy
 } = Deno.errors;
 
+export class Invalid extends InvalidData {
+    constructor(msg?: string) {
+        super(msg);
+        this.name = "Invalid";
+      }  
+}
+
 export class Unknown extends InvalidData {
     constructor(msg?: string) {
         super(msg);
