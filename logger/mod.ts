@@ -11,6 +11,11 @@ export const log = { info, warning, error, critical, debug };
 export { LoggerConfig, Logger };
 export type { LevelName };
 
+/** 默认导出的构建函数。*/
+export default function(config?: LoggersConfig): Edge {
+    return new LoggersManager(config);
+}
+
 const { FileHandler, RotatingFileHandler, ConsoleHandler } = LogHandlers;
 
 type FormatterFunction = (logRecord: LogRecord) => string;

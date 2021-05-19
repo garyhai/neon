@@ -4,6 +4,11 @@ import { Edge, isBlank, toVertex, toArray } from "../deepgraph/mod.ts";
 import { NotFound, PermissionDenied, Unknown } from "../errors/mod.ts";
 import { load, Registration, Settings } from "./mod.ts";
 
+/** 默认导出的构建函数。*/
+export default function(config: LoaderConfig, root: Edge): Edge {
+    return new Loader(config, root);
+}
+
 /** 可以被激活成 Active Vertex 的数据 */
 export interface VertexData {
     /** 全局唯一的ID，用于注册。 */
@@ -80,13 +85,14 @@ export class Loader implements Edge {
 
     /// Load data and activate vertex with registering on-demanded.
     async load(idOrData: string | VertexData, register?: boolean): Promise<Edge> {
-        let data;
+        let data, name;
         if (typeof idOrData === "object") {
             data = idOrData;
         } else {
             const v = this.#vertices.get(idOrData);
             // make a data copy from repository
             data = { ...v };
+            name = idOrData;
         }
         if (data === undefined) throw NotFound(`vertex with ID ${idOrData} is not found`);
         // if no builder provided, return data only.
@@ -101,7 +107,8 @@ export class Loader implements Edge {
         // if register is true, there is only one instance of the vertex.
         register ??= data.register ?? this.#register;
         if (register) {
-            const v: Registration = { vertex, id: data.id, token: this.#token };
+            const id = data.id ?? name;
+            const v: Registration = { vertex, id, token: this.#token };
             this.#root.set(v);
         }
         // async initialize on-demand
@@ -112,7 +119,7 @@ export class Loader implements Edge {
     /** 获取内部参数或者从vertex表中获取数据。*/
     get(key: string): unknown {
         switch (key) {
-            case "name": return this.#name;
+            case "from": return this.#name;
             case "root": return this.#root;
             case "register": return this.#register;
             case "modules": return this.#modules;

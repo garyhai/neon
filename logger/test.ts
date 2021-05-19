@@ -2,7 +2,7 @@
 
 import { assertEquals } from "https://deno.land/std@0.97.0/testing/asserts.ts";
 
-import { log, LoggersConfig, LoggersManager, Logger } from "./mod.ts";
+import { default as create, log, LoggersConfig, Logger } from "./mod.ts";
 
 const LOG_CONFIG: LoggersConfig = {
     handlers: {
@@ -30,12 +30,11 @@ const LOG_CONFIG: LoggersConfig = {
     }
 };
 
-
 Deno.test("neunit loggers", async () => {
-    const logger = new LoggersManager(LOG_CONFIG);
+    const logger = create(LOG_CONFIG);
     await logger.invoke("setup");
     assertEquals(log.info("start logging"), "start logging");
-    assertEquals(log.warning(logger.get(["handlers", "default", "id"])), "console");
+    assertEquals(log.warning(logger.get(["handlers", "default", "from"])), "console");
     assertEquals(log.error("error"), "error");
     assertEquals(log.critical("critical"), "critical");
     assertEquals(log.debug("debug"), "debug");
