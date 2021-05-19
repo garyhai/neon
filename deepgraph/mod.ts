@@ -17,7 +17,7 @@ export interface Edge {
     /** 获取edge中的数据，path可以是数组用于获取更深层次的数据。 */
     get(path?: unknown): unknown;
     /** 设置数据。Edge对象可以自行解释value内容。path是可选的层次数据结构操作路径。 */
-    set(value: unknown, path?: unknown): unknown;
+    set(value?: unknown, path?: unknown): unknown;
     /** 异步操作
      * 
      * 相对于get/set的同步数据操作，invoke是通用的异步函数调用。

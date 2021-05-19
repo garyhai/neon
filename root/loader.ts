@@ -42,7 +42,7 @@ export interface LoaderConfig {
 
 const DEFAULT_LOADER_CONFIG: LoaderConfig = {
     name: "neunit",
-    vertices: "modules.json",
+    vertices: "vertices.js",
     register: true,
 };
 
@@ -91,10 +91,10 @@ export class Loader implements Edge {
         } else {
             const v = this.#vertices.get(idOrData);
             // make a data copy from repository
-            data = { ...v };
+            if (v !== undefined) data = { ...v };
             name = idOrData;
         }
-        if (data === undefined) throw NotFound(`vertex with ID ${idOrData} is not found`);
+        if (data === undefined) throw new NotFound(`vertex with ID ${idOrData} is not found`);
         // if no builder provided, return data only.
         if (isBlank(data.module)) return toVertex(data);
         const [modName, builderName] = toArray(data.module);

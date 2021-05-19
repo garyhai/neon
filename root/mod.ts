@@ -42,7 +42,7 @@ export interface RootConfig {
 
 const DEFAULT_CONFIG: RootConfig = {
     loader: "./loader.ts",
-    loaderConfig: "modules.json",
+    loaderConfig: "./vertices.js",
 };
 
 /** 整个Deepgraph的根。也是系统的初始位置。运行中各个模块可以设定自己的根。 */
@@ -136,7 +136,7 @@ export class Root implements Edge {
             case "load": {
                 const id = data as string;
                 const vertex = this.#registry.get(id);
-                if (vertex) return vertex;
+                if (vertex !== undefined) return vertex;
                 if (this.#loader) return this.#loader.invoke("load", data, options);
                 throw new Unavailable("loader of root is not ready");
             }
