@@ -1,5 +1,7 @@
+PERMESSION := --allow-read --allow-net
+
 test:
-	deno test
+	deno test $(PERMESSION)
 
 lint: 
 	deno lint
