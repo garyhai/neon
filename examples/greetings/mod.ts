@@ -1,9 +1,9 @@
 // Copyright 2021 the Neunit team. All rights reserved. Neunit licence.
 
-import { Edge } from "../deepgraph/mod.ts";
-import { Invalid, NotFound, Unknown } from "../errors/mod.ts";
-import { log } from "../logger/mod.ts";
-import { Settings } from "../root/mod.ts";
+import { Edge } from "../../deepgraph/mod.ts";
+import { Invalid, NotFound, Unknown } from "../../errors/mod.ts";
+import { log } from "../../logger/mod.ts";
+import { Settings } from "../../root/mod.ts";
 
 /** 默认导出的构建函数。*/
 export default function (config: SomeoneConfig, root: Edge): Edge {

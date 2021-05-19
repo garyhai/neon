@@ -2,7 +2,7 @@
 
 import { assertEquals, assertExists, assertThrows, assertThrowsAsync } from "https://deno.land/std@0.97.0/testing/asserts.ts";
 import { Edge } from "../deepgraph/mod.ts";
-import { NotFound, Unknown } from "../errors/mod.ts";
+import { Forbidden, NotFound, Unknown } from "../errors/mod.ts";
 import { log } from "../logger/mod.ts";
 import createRoot from "./mod.ts";
 
@@ -26,7 +26,7 @@ const LOGGER = {
 };
 
 const BOB = {
-    module: "../examples/greetings.ts",
+    module: "../examples/greetings/mod.ts",
     name: "Bob",
     title: "Mr.",
     greeting: "Hello",
@@ -34,7 +34,7 @@ const BOB = {
 
 const ALICE = {
     id: "alice",
-    module: "../examples/greetings.ts",
+    module: "../examples/greetings/mod.ts",
     name: "Alice",
     title: "Ms.",
     greeting: "Hi",
@@ -82,4 +82,14 @@ Deno.test("neunit root", async () => {
     const response = await bob.invoke("meet", "alice");
     assertEquals(response, "welcome");
     assertExists(root.get("alice"));
+
+    assertThrowsAsync(async () => {
+        await root.invoke("deregister", "Bob");
+    }, Forbidden);
+    const token = ROOT_CONFIG.token;
+    assertEquals(await root.invoke("deregister", "Bob", {token}), true);
+    assertEquals(root.get("Bob"), undefined);
+    const newBob = await root.invoke("load", "Bob") as Edge;
+    assertEquals(newBob === bob, false);
+    assertEquals(newBob, bob);
 });

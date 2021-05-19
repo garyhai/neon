@@ -2,7 +2,7 @@
 
 import { v4 as uuid } from "https://deno.land/std@0.97.0/uuid/mod.ts";
 import { isEdge, Edge } from "../deepgraph/mod.ts";
-import { Forbidden, NotFound, Unavailable, Unknown } from "../errors/mod.ts";
+import { Forbidden, Invalid, NotFound, Unavailable, Unknown } from "../errors/mod.ts";
 import { log } from "../logger/mod.ts";
 
 /** Vertex构建函数接口。 */
@@ -98,24 +98,28 @@ export class Root implements Edge {
      */
     set(value: Registration | Edge | undefined, path?: string[]): string | boolean {
         let [withToken, key] = path ?? [];
-        if (value === undefined) {
-            if (withToken !== this.#config.token) {
-                throw new Forbidden("token is invalid");
-            }
-            return this.#registry.delete(key);
-        }
         let vtx = undefined;
         if (isEdge(value)) {
             vtx = value;
-        } else {
+        } else if (value) {
             const { vertex, id, token } = value as Registration;
             vtx = vertex;
             key ??= id!;
             withToken ??= token!;
         }
+
+        /// authenticate
         if (withToken !== this.#config.token) {
             throw new Forbidden("token is invalid");
         }
+
+        /// deregister
+        if (vtx === undefined) {
+            if (key === undefined) throw new Invalid;
+            return this.#registry.delete(key);
+        }
+
+        /// register
         key ??= uuid.generate();
         this.#registry.set(key, vtx);
         return key;
@@ -126,7 +130,7 @@ export class Root implements Edge {
      * @param options 承载额外的参数，注册时通常会有token和key值。
      * @returns 异步返回各种调用的结果。这里强制要求返回的数据具备Edge接口。
      */
-    async invoke(command: string, data?: string | Edge | Registration, options?: Settings): Promise<unknown> {
+    async invoke(command: string, data?: string | Edge | Registration | string[], options?: Settings): Promise<unknown> {
         switch (command) {
             case "get":
             case "load": {
@@ -146,6 +150,10 @@ export class Root implements Edge {
             }
             case "delete":
             case "deregister": {
+                if (options === undefined) {
+                    if (Array.isArray(data)) return this.set(undefined, data);
+                    return this.set(data as Registration);
+                }
                 const { token } = options ?? {};
                 return this.set(undefined, [token as string, data as string]);
             }
