@@ -97,7 +97,7 @@ export class LoggersManager implements Edge {
 
     async initialize(config?: LoggersConfig) {
         let newConfig = this.#config.get() as LoggersConfig;
-        if (config != undefined) {
+        if (config) {
             newConfig = { ...newConfig, ...config };
         }
 

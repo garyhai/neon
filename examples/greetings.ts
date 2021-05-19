@@ -6,7 +6,7 @@ import { log } from "../logger/mod.ts";
 import { Settings } from "../root/mod.ts";
 
 /** 默认导出的构建函数。*/
-export default function(config: SomeoneConfig, root: Edge): Edge {
+export default function (config: SomeoneConfig, root: Edge): Edge {
     return new Someone(config, root);
 }
 
@@ -33,10 +33,12 @@ export class Someone implements Edge {
     }
 
     get(key: string): string {
-        if (key === "from") return this.#id;
-        if (key === "name") return this.#name;
-        if (key === "greeting") return this.#greeting;
-        if (key === "#title") return this.#title;
+        switch (key) {
+            case "id": return this.#id;
+            case "name": return this.#name;
+            case "greeting": return this.#greeting;
+            case "title": return this.#title;
+        }
         throw new NotFound;
     }
 
@@ -80,7 +82,7 @@ export class Someone implements Edge {
     }
 
     async sayHello(id: string, first: boolean): Promise<unknown> {
-        const options = {from: this.#id, first};
+        const options = { from: this.#id, first };
         const someone = await this.#root.invoke("load", id) as Edge;
         const title = someone.get("title") as string;
         const name = someone.get("name") as string;

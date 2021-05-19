@@ -20,7 +20,7 @@ export interface VertexData {
      * 跟_config类似，用于初始化模块，但这个是异步初始化过程。
      * 可以避免同步初始化引起的死锁现象。
      */
-    initialize?: Settings;
+    initialize?: boolean;
     /** 是否需要注册到Root */
     register?: boolean;
     /** 激活函数的配置参数。如果没有该项，整个VertexData会被作为配置参数 */
@@ -112,7 +112,7 @@ export class Loader implements Edge {
             this.#root.set(v);
         }
         // async initialize on-demand
-        if (data.initialize) await vertex.invoke("initialize", data.initialize);
+        if (data.initialize) await vertex.invoke("initialize");
         return vertex;
     }
 

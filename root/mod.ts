@@ -75,7 +75,8 @@ export class Root implements Edge {
         const loader = await forge(config, this);
         await loader.invoke("initialize");
         this.#loader = loader;
-        for (const preload of config.preloads) {
+        const preloads = this.#config.preloads ?? [];
+        for (const preload of preloads) {
             await loader.invoke("load", preload);
         }
         log.info("neunit system is started!");
@@ -156,7 +157,11 @@ export class Root implements Edge {
 
 
 // deno-lint-ignore no-explicit-any
-export async function load(modPath: string, varName = "default"): Promise<any> {
+export async function load(modPath: string | string[], varName?: string): Promise<any> {
+    if (Array.isArray(modPath)) {
+        [modPath, varName] = modPath;
+    }
+    varName ??= "default";
     const module = await import(modPath);
     const v = module[varName];
     if (v === undefined) throw new NotFound(`${varName} is not exported from ${modPath}`);

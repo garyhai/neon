@@ -34,7 +34,7 @@ Deno.test("neunit loggers", async () => {
     const logger = create(LOG_CONFIG);
     await logger.invoke("setup");
     assertEquals(log.info("start logging"), "start logging");
-    assertEquals(log.warning(logger.get(["handlers", "default", "from"])), "console");
+    assertEquals(log.warning(logger.get(["handlers", "default", "id"])), "console");
     assertEquals(log.error("error"), "error");
     assertEquals(log.critical("critical"), "critical");
     assertEquals(log.debug("debug"), "debug");
