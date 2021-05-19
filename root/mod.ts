@@ -95,15 +95,29 @@ export class Root implements Edge {
      * @param key 注册的全局ID。不提供时，自动生成uuid作为新的key，并返回该key。
      * @returns 注册成功返回注册时的id；注销成功返回true；注销失败返回false。
      */
-    set(value: Registration | string | undefined, key?: string): string | boolean {
-        if (value === this.#config.token) return this.#registry.delete(key as string);
-        const { vertex, id, token } = value as Registration;
-        if (token !== this.#config.token) {
+    set(value: Registration | Edge | undefined, path?: string[]): string | boolean {
+        let [withToken, key] = path ?? [];
+        if (value === undefined) {
+            if (withToken !== this.#config.token) {
+                throw new Forbidden("token is invalid");
+            }
+            return this.#registry.delete(key);
+        }
+        let vtx = undefined;
+        if (isEdge(value)) {
+            vtx = value;
+        } else {
+            const { vertex, id, token } = value as Registration;
+            vtx = vertex;
+            key ??= id!;
+            withToken ??= token!;
+        }
+        if (withToken !== this.#config.token) {
             throw new Forbidden("token is invalid");
         }
-        key ??= id ?? uuid.generate();
-        this.#registry.set(key as string, vertex);
-        return key as string;
+        key ??= uuid.generate();
+        this.#registry.set(key, vtx);
+        return key;
     }
 
     /** 执行异步命令
@@ -132,7 +146,7 @@ export class Root implements Edge {
             case "delete":
             case "deregister": {
                 const { token } = options ?? {};
-                return this.set(token as string, data as string);
+                return this.set(undefined, [token as string, data as string]);
             }
             case "initialize": return await this.initialize();
         }

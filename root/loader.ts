@@ -140,7 +140,7 @@ export class Loader implements Edge {
         switch (command) {
             case "load": return this.load(data);
             case "register": return this.load(data, true);
-            case "deregister": return this.#root.set(this.#token, data);
+            case "deregister": return this.#root.set(undefined, [this.#token, data]);
             case "instantiate": return this.load(data, false);
             case "initialize": return await this.initialize();
         }
