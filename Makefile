@@ -12,4 +12,7 @@ upgrade:
 greetings:
 	deno run $(PERMESSION) main.ts -- ../examples/greetings/config.js
 
+compile:
+	deno compile $(PERMESSION) main.ts
+
 .PHONY: test lint

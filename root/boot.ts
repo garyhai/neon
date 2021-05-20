@@ -2,7 +2,6 @@
 
 import { Edge } from "../deepgraph/mod.ts";
 import { AlreadyExists, Unavailable, Unknown, Forbidden } from "../errors/mod.ts";
-import { log } from "../logger/mod.ts";
 import { load, Settings } from "./mod.ts";
 
 /** 默认导出的构建函数。与其他模块不同的是，Boot模块没有根域。 */
