@@ -15,4 +15,4 @@ greetings:
 compile:
 	deno compile $(PERMESSION) main.ts
 
-.PHONY: test lint
+.PHONY: test lint upgrade greetings compile
