@@ -1,4 +1,4 @@
-// Copyright 2021 the Neunit team. All rights reserved. Neunit licence.
+// Copyright 2021 the Neunit team. All rights reserved. MIT licence.
 
 /** Version of the Neunit modules and starter */
 

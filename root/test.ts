@@ -1,4 +1,4 @@
-// Copyright 2021 the Neunit team. All rights reserved. Neunit licence.
+// Copyright 2021 the Neunit team. All rights reserved. MIT licence.
 
 import { assertEquals, assertExists, assertThrows, assertThrowsAsync } from "https://deno.land/std@0.97.0/testing/asserts.ts";
 import { Edge } from "../deepgraph/mod.ts";

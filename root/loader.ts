@@ -1,4 +1,4 @@
-// Copyright 2021 the Neunit team. All rights reserved. Neunit licence.
+// Copyright 2021 the Neunit team. All rights reserved. MIT licence.
 
 import { Edge, isBlank, toVertex, toArray } from "../deepgraph/mod.ts";
 import { NotFound, PermissionDenied, Unknown } from "../errors/mod.ts";
