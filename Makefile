@@ -6,6 +6,9 @@ test:
 lint: 
 	deno lint
 
+fmt:
+	deno fmt
+
 upgrade:
 	deno run -A https://deno.land/x/udd/main.ts **/*.ts
 
@@ -15,4 +18,4 @@ greetings:
 compile:
 	deno compile $(PERMESSION) main.ts
 
-.PHONY: test lint upgrade greetings compile
+.PHONY: test lint upgrade greetings compile fmt
