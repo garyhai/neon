@@ -42,7 +42,7 @@ export interface RootConfig {
 
 const DEFAULT_CONFIG: RootConfig = {
     loader: "./loader.ts",
-    loaderConfig: "./vertices.js",
+    loaderConfig: "./vertices.json",
 };
 
 /** 整个Deepgraph的根。也是系统的初始位置。运行中各个模块可以设定自己的根。 */
@@ -62,7 +62,7 @@ export class Root implements Edge {
     async initialize(): Promise<Edge> {
         let config;
         if (typeof this.#config.loaderConfig === "string") {
-            config = await load(this.#config.loaderConfig);
+            config = await loadConfig(this.#config.loaderConfig);
         } else {
             config = this.#config.loaderConfig;
         }
@@ -71,7 +71,7 @@ export class Root implements Edge {
             config["token"] ??= this.#config.token;
         }
         const loaderPath = config["module"] ?? this.#config.loader;
-        const forge = await load(loaderPath);
+        const forge = await load(loaderPath as string);
         const loader = await forge(config, this);
         await loader.invoke("initialize");
         this.#loader = loader;
@@ -174,4 +174,11 @@ export async function load(modPath: string | string[], varName?: string): Promis
     const v = module[varName];
     if (v === undefined) throw new NotFound(`${varName} is not exported from ${modPath}`);
     return v;
+}
+
+/** Load settings from config file. */
+export async function loadConfig(configFile: string): Promise<Settings> {
+    if (configFile.endsWith("js")) return load(configFile);
+    const raw = await Deno.readTextFile(configFile);
+    return JSON.parse(raw);
 }

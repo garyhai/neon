@@ -1,9 +1,9 @@
-export default {
+{
     "Bob": {
         "module": "../examples/greetings/mod.ts",
         "name": "Bob",
         "title": "Mr.",
-        "greeting": "Hello",
+        "greeting": "Hello"
     },
     "alice": {
         "id": "alice",

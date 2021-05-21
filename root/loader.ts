@@ -2,7 +2,7 @@
 
 import { Edge, isBlank, toVertex, toArray } from "../deepgraph/mod.ts";
 import { NotFound, PermissionDenied, Unknown } from "../errors/mod.ts";
-import { load, Registration, Settings } from "./mod.ts";
+import { load, loadConfig, Registration, Settings } from "./mod.ts";
 
 /** 默认导出的构建函数。*/
 export default function(config: LoaderConfig, root: Edge): Edge {
@@ -75,7 +75,7 @@ export class Loader implements Edge {
     async initialize(vertices?: string): Promise<Edge> {
         vertices ??= this.#modules;
         if (vertices) {
-            const data = await load(vertices);
+            const data = await loadConfig(vertices);
             for (const [k, v] of Object.entries(data)) {
                 this.#vertices.set(k, v as VertexData);
             }
@@ -90,11 +90,13 @@ export class Loader implements Edge {
             data = idOrData;
         } else {
             const v = this.#vertices.get(idOrData);
+            if (v === undefined) {
+                throw new NotFound(`vertex with ID ${idOrData} is not found`);
+            }
             // make a data copy from repository
-            if (v !== undefined) data = { ...v };
+            data = { ...v };
             name = idOrData;
         }
-        if (data === undefined) throw new NotFound(`vertex with ID ${idOrData} is not found`);
         // if no builder provided, return data only.
         if (isBlank(data.module)) return toVertex(data);
         const [modName, builderName] = toArray(data.module);
@@ -119,7 +121,7 @@ export class Loader implements Edge {
     /** 获取内部参数或者从vertex表中获取数据。*/
     get(key: string): unknown {
         switch (key) {
-            case "from": return this.#name;
+            case "name": return this.#name;
             case "root": return this.#root;
             case "register": return this.#register;
             case "modules": return this.#modules;

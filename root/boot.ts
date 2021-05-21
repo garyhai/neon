@@ -2,7 +2,7 @@
 
 import { Edge } from "../deepgraph/mod.ts";
 import { AlreadyExists, Unavailable, Unknown, Forbidden } from "../errors/mod.ts";
-import { load, Settings } from "./mod.ts";
+import { load, loadConfig, Settings } from "./mod.ts";
 
 /** 默认导出的构建函数。与其他模块不同的是，Boot模块没有根域。 */
 export default function startup(args?: string | BootConfig): Edge {
@@ -29,7 +29,7 @@ export class Boot implements Edge {
             this.#bootConfig = config;
         }
         // 传入配置参数优先级最高，其次是命令行参数中的配置文件路径，最后是环境变量。
-        this.#bootConfig.config ??= Deno.args[1] ?? Deno.env.get("NEUNIT_CONFIG_FILE") ?? "neunit.js";
+        this.#bootConfig.config ??= Deno.args[1] ?? Deno.env.get("NEUNIT_CONFIG_FILE") ?? "neunit.json";
         this.#bootConfig.starter ??= Deno.args[2] ?? Deno.env.get("NEUNIT_STARTER") ?? "./mod.ts";
     }
 
@@ -39,7 +39,7 @@ export class Boot implements Edge {
         let starterConfig;
         if (typeof this.#bootConfig.config === "string") {
             // 加载配置文件，json, js, 或者ts。
-            starterConfig = await load(this.#bootConfig.config);
+            starterConfig = await loadConfig(this.#bootConfig.config);
         } else {
             // 制作一个副本避免被意外更改。
             starterConfig = {...this.#bootConfig.config};

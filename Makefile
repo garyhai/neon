@@ -1,7 +1,7 @@
 PERMESSION := --allow-read --allow-net --allow-env
 
 test:
-	deno test $(PERMESSION)
+	deno test $(PERMESSION) --allow-write
 
 lint: 
 	deno lint
@@ -10,7 +10,7 @@ upgrade:
 	deno run -A https://deno.land/x/udd/main.ts **/*.ts
 
 greetings:
-	deno run $(PERMESSION) main.ts -- ../examples/greetings/config.js
+	deno run $(PERMESSION) main.ts -- ./examples/greetings/config.json
 
 compile:
 	deno compile $(PERMESSION) main.ts
