@@ -68,7 +68,7 @@ export class Boot implements Edge {
         if (!this.#starter) throw new Unavailable("system is not started");
         const starter = this.#starter;
         this.#starter = undefined;
-        return starter.invoke("stop");
+        return starter.invoke("quit");
       }
       case "restart":
         if (this.#starter) await this.#starter.invoke("stop");

@@ -2,4 +2,4 @@
 
 /** Version of the Neunit modules and starter */
 
-export const VERSION = "0.1.2";
+export const VERSION = "0.1.3";

@@ -81,6 +81,7 @@ export class Root implements Edge {
     const loader = await forge(config, this);
     await loader.invoke("initialize");
     this.#loader = loader;
+    this.#registry.set("loader", loader);
     const preloads = this.#config.preloads ?? [];
     for (const preload of preloads) {
       await loader.invoke("load", preload);
@@ -131,6 +132,17 @@ export class Root implements Edge {
     /// register
     key ??= uuid.generate();
     this.#registry.set(key, vtx);
+
+    // loader take over
+    if (key === "loader") {
+      log.warning(
+        `loader is changed from ${this.#loader!.get("name")} to ${
+          vtx.get("name")
+        }`,
+      );
+      this.#loader = vtx;
+    }
+
     return key;
   }
 
@@ -172,15 +184,22 @@ export class Root implements Edge {
       }
       case "initialize":
         return await this.initialize();
+      case "quit": {
+        this.#registry.clear();
+        const loader = this.#loader;
+        this.#loader = undefined;
+        if (loader) return loader.invoke(command, data, options);
+        return false;
+      }
     }
     throw new Unknown(`unknown intent: ${command}`);
   }
 }
 
-// deno-lint-ignore no-explicit-any
 export async function load(
   modPath: string | string[],
   varName?: string,
+  // deno-lint-ignore no-explicit-any
 ): Promise<any> {
   if (Array.isArray(modPath)) {
     [modPath, varName] = modPath;
