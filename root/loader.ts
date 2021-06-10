@@ -41,7 +41,7 @@ export interface LoaderConfig {
 }
 
 const DEFAULT_LOADER_CONFIG: LoaderConfig = {
-  name: "neunit",
+  name: "neon",
   vertices: "vertices.js",
   register: true,
 };

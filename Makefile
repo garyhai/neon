@@ -6,7 +6,7 @@ test:
 lint: 
 	deno lint
 
-fmt:
+format:
 	deno fmt
 
 upgrade:
@@ -18,4 +18,4 @@ greetings:
 compile:
 	deno compile $(PERMESSION) main.ts
 
-.PHONY: test lint upgrade greetings compile fmt
+.PHONY: test lint upgrade greetings compile format

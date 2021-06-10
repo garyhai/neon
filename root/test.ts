@@ -64,7 +64,7 @@ const ROOT_CONFIG = {
   preloads: ["logger"],
 };
 
-Deno.test("neunit root", async () => {
+Deno.test("neon root", async () => {
   const root = createRoot(ROOT_CONFIG);
   assertEquals(root.get("logger"), undefined);
   log.info("root is created without initialization");

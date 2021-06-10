@@ -30,7 +30,7 @@ const LOG_CONFIG: LoggersConfig = {
   },
 };
 
-Deno.test("neunit loggers", async () => {
+Deno.test("neon loggers", async () => {
   const logger = create(LOG_CONFIG);
   await logger.invoke("setup");
   assertEquals(log.info("start logging"), "start logging");

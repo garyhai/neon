@@ -86,7 +86,7 @@ export class Root implements Edge {
     for (const preload of preloads) {
       await loader.invoke("load", preload);
     }
-    log.info("neunit system is started!");
+    log.info("neon system is started!");
     return this;
   }
 

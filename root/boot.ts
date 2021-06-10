@@ -35,9 +35,9 @@ export class Boot implements Edge {
     }
     // 传入配置参数优先级最高，其次是命令行参数中的配置文件路径，最后是环境变量。
     this.#bootConfig.config ??= Deno.args[1] ??
-      Deno.env.get("NEUNIT_CONFIG_FILE") ?? "neunit.json";
+      Deno.env.get("NEON_CONFIG_FILE") ?? "neon.json";
     this.#bootConfig.starter ??= Deno.args[2] ??
-      Deno.env.get("NEUNIT_STARTER") ?? "./mod.ts";
+      Deno.env.get("NEON_STARTER") ?? "./mod.ts";
   }
 
   /** 如果config参数不为空，则会覆盖原有配置项。这个设计是为了未来能够在运行时动态启动。*/

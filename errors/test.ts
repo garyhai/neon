@@ -7,7 +7,7 @@ import {
 } from "https://deno.land/std@0.97.0/testing/asserts.ts";
 import { Busy, Http, NotFound, toHttpError } from "./mod.ts";
 
-Deno.test("neunit errors", () => {
+Deno.test("neon errors", () => {
   const notFound = new NotFound("not found");
   assertThrows(
     () => {

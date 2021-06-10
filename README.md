@@ -1,3 +1,3 @@
-# neunit
+# neon
 
-Starter of Neunit Ecosystem.
+Neonatal framework.
