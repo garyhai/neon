@@ -1,6 +1,6 @@
 // Copyright 2021 the Neunit team. All rights reserved. MIT licence.
 
-import { v4 as uuid } from "https://deno.land/std@0.97.0/uuid/mod.ts";
+import { v4 as uuid } from "https://deno.land/std@0.100.0/uuid/mod.ts";
 import { Edge, isEdge } from "../deepgraph/mod.ts";
 import {
   Forbidden,

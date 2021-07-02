@@ -1,6 +1,6 @@
 // Copyright 2021 the Neunit team. All rights reserved. MIT license.
 
-import { assertEquals } from "https://deno.land/std@0.97.0/testing/asserts.ts";
+import { assertEquals } from "https://deno.land/std@0.100.0/testing/asserts.ts";
 
 import { default as create, log, Logger, LoggersConfig } from "./mod.ts";
 

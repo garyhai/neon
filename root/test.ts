@@ -5,7 +5,7 @@ import {
   assertExists,
   assertThrows,
   assertThrowsAsync,
-} from "https://deno.land/std@0.97.0/testing/asserts.ts";
+} from "https://deno.land/std@0.100.0/testing/asserts.ts";
 import { Edge } from "../deepgraph/mod.ts";
 import { Forbidden, NotFound, Unknown } from "../errors/mod.ts";
 import { log } from "../logger/mod.ts";

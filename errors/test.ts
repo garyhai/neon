@@ -1,13 +1,13 @@
 // Copyright 2021 the Neunit team. All rights reserved. MIT license.
 
 import {
-  assert,
   assertEquals,
+  assertObjectMatch,
   assertThrows,
-} from "https://deno.land/std@0.97.0/testing/asserts.ts";
-import { Busy, Http, NotFound, toHttpError } from "./mod.ts";
+} from "https://deno.land/std@0.100.0/testing/asserts.ts";
+import { Busy, Code, Http, NotFound } from "./mod.ts";
 
-Deno.test("neon errors", () => {
+Deno.test("neon errors", async () => {
   const notFound = new NotFound("not found");
   assertThrows(
     () => {
@@ -17,39 +17,40 @@ Deno.test("neon errors", () => {
     "not found",
   );
 
-  const httpNotFound = new Http.NotFound("not found");
+  const httpNotFound = new Http(Code.NotFound, { direction: "east" });
   assertThrows(
     () => {
       throw httpNotFound;
     },
-    Http.NotFound,
-    "not found",
+    Http,
+    "Not Found",
   );
-
-  assert(Http.isHttpError(httpNotFound));
-  assertEquals(Http.isHttpError(notFound), false);
-  assertEquals(httpNotFound.httpStatus, 404);
+  assertEquals(httpNotFound.status, 404);
+  let resp = httpNotFound.toResponse();
+  let body = await resp.json();
+  assertEquals(body.message, "Not Found");
+  assertEquals(body.direction, "east");
 
   const busy = new Busy();
-  const serverBusy = toHttpError(busy);
-  assert(Http.isServerError(serverBusy));
-  assertEquals(serverBusy.httpStatus, 500);
-  const clientBusy = toHttpError(busy, true);
-  assertEquals(clientBusy.httpStatus, 400);
-  assert(Http.isClientError(clientBusy));
-
+  const serverBusy = new Http(busy, { timeout: 10, message: "waiting" });
+  assertEquals(serverBusy.toString(), "Busy [500]: waiting");
+  assertEquals(serverBusy.status, 500);
+  assertEquals(serverBusy.expose, false);
+  assertEquals(serverBusy.get("timeout"), 10);
+  resp = serverBusy.toResponse();
+  assertEquals(resp.body, null);
+  serverBusy.expose = true;
+  const body1 = JSON.parse(serverBusy.toString());
+  assertEquals(body1.timeout, 10);
+  resp = serverBusy.toResponse();
+  body = await resp.json();
+  assertEquals(body.timeout, 10);
+  assertObjectMatch(body1, body);
   assertThrows(
     () => {
       throw serverBusy;
     },
-    Http.InternalServerError,
-    "Busy",
-  );
-  assertThrows(
-    () => {
-      throw clientBusy;
-    },
-    Http.BadRequest,
-    "Busy",
+    Http,
+    "waiting",
   );
 });

@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 
-import { assertEquals } from "https://deno.land/std@0.97.0/testing/asserts.ts";
+import { assertEquals } from "https://deno.land/std@0.100.0/testing/asserts.ts";
 import { loadConfig } from "./mod.ts";
 
 const DATA = {

@@ -15,9 +15,9 @@ import {
   LoggerConfig,
   setup,
   warning,
-} from "https://deno.land/std@0.97.0/log/mod.ts";
-import { LogRecord } from "https://deno.land/std@0.97.0/log/logger.ts";
-import { format } from "https://deno.land/std@0.97.0/datetime/mod.ts";
+} from "https://deno.land/std@0.100.0/log/mod.ts";
+import { LogRecord } from "https://deno.land/std@0.100.0/log/logger.ts";
+import { format } from "https://deno.land/std@0.100.0/datetime/mod.ts";
 import { Edge, toArray, toVertex, Vertex } from "../deepgraph/mod.ts";
 
 export const log = { info, warning, error, critical, debug };
