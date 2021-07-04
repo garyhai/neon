@@ -30,10 +30,16 @@ export { Status as Code } from "./deps.ts";
 
 export class Http extends Error {
   #inner: IError;
-  #expose?: boolean;
   constructor(status: any, message?: any, props?: Props) {
     super();
-    this.#inner = createError(status, message, props);
+    if (status instanceof Error) {
+      this.#inner = createError(status, message);
+    } else if (message instanceof Error) {
+      if (status) (message as any).status = status;
+      this.#inner = createError(message, props);
+    } else {
+      this.#inner = createError(status, message, props);
+    }
   }
 
   get name(): string {
@@ -52,12 +58,11 @@ export class Http extends Error {
     return this.#inner.statusCode;
   }
   get expose(): boolean {
-    if (this.#expose != undefined) return this.#expose;
     return !(this.#inner.expose === false);
   }
 
   set expose(flag: boolean) {
-    this.#expose = flag;
+    this.#inner.expose = flag;
   }
 
   get(key: string): any {
@@ -71,10 +76,11 @@ export class Http extends Error {
     return `${this.name} [${this.status}]: ${this.message}`;
   }
 
-  toResponse(): Response {
-    if (!this.expose) {
+  toResponse(expose?: boolean): Response {
+    expose ??= this.expose;
+    if (!expose) {
       const { status, statusText } = this.#inner;
-      return new Response(undefined, { status, statusText });
+      return new Response(null, { status, statusText });
     }
     let { status, statusText, headers, body, ...others } = this.#inner;
     headers = new Headers(headers);

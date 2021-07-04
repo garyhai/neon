@@ -53,4 +53,21 @@ Deno.test("neon errors", async () => {
     Http,
     "waiting",
   );
+
+  const clientBusy = new Http(Code.RequestTimeout, busy, {
+    timeout: 10,
+    message: "waiting",
+  });
+  assertEquals(clientBusy.status, 408);
+  assertEquals(clientBusy.expose, true);
+  resp = clientBusy.toResponse();
+  body = await resp.json();
+  assertEquals(body.timeout, 10);
+  assertThrows(
+    () => {
+      throw clientBusy;
+    },
+    Http,
+    "waiting",
+  );
 });
