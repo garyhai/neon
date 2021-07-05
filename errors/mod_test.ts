@@ -70,4 +70,22 @@ Deno.test("neon errors", async () => {
     Http,
     "waiting",
   );
+
+  const errInfo = new Http({
+    timeout: 10,
+    message: "timeout",
+  });
+  assertEquals(errInfo.status, 500);
+  assertEquals(errInfo.expose, false);
+  assertEquals(errInfo.get("timeout"), 10);
+  resp = errInfo.toResponse();
+  assertEquals(resp.body, null);
+  assertEquals(resp.status, 500);
+  assertThrows(
+    () => {
+      throw errInfo;
+    },
+    Http,
+    "timeout",
+  );
 });

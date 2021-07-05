@@ -4,7 +4,7 @@
 
 /** Re-export Deno.errors and http errors as neunit errors */
 
-import { createError, IError, Props } from "./deps.ts";
+import { createError, IError, Props, Status } from "./deps.ts";
 
 export const {
   NotFound,
@@ -34,8 +34,10 @@ export class Http extends Error {
     super();
     if (status instanceof Error) {
       this.#inner = createError(status, message);
+    } else if (typeof status !== "number") {
+      this.#inner = createError(Status.InternalServerError, status, message);
     } else if (message instanceof Error) {
-      if (status) (message as any).status = status;
+      (message as any).status = status;
       this.#inner = createError(message, props);
     } else {
       this.#inner = createError(status, message, props);
