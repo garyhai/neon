@@ -1,7 +1,7 @@
 PERMESSION := --allow-read --allow-net --allow-env
 
 test:
-	deno test $(PERMESSION) --allow-write
+	deno test $(PERMESSION) --allow-write --unstable
 
 lint: 
 	deno lint
