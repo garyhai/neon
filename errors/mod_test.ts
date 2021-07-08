@@ -2,7 +2,6 @@
 
 import {
   assertEquals,
-  assertObjectMatch,
   assertThrows,
 } from "https://deno.land/std@0.100.0/testing/asserts.ts";
 import { Busy, Code, Http, NotFound } from "./mod.ts";
@@ -40,12 +39,9 @@ Deno.test("neon errors", async () => {
   resp = serverBusy.toResponse();
   assertEquals(resp.body, null);
   serverBusy.expose = true;
-  const body1 = JSON.parse(serverBusy.toString());
-  assertEquals(body1.timeout, 10);
   resp = serverBusy.toResponse();
   body = await resp.json();
   assertEquals(body.timeout, 10);
-  assertObjectMatch(body1, body);
   assertThrows(
     () => {
       throw serverBusy;
@@ -88,4 +84,7 @@ Deno.test("neon errors", async () => {
     Http,
     "timeout",
   );
+
+  const errInfo2 = new Http(errInfo);
+  assertEquals(errInfo.inner, errInfo2.inner);
 });

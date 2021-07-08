@@ -32,7 +32,9 @@ export class Http extends Error {
   #inner: IError;
   constructor(status: any, message?: any, props?: Props) {
     super();
-    if (status instanceof Error) {
+    if (status instanceof Http) {
+      this.#inner = status.#inner;
+    } else if (status instanceof Error) {
       this.#inner = createError(status, message);
     } else if (typeof status !== "number") {
       this.#inner = createError(Status.InternalServerError, status, message);
@@ -42,6 +44,10 @@ export class Http extends Error {
     } else {
       this.#inner = createError(status, message, props);
     }
+  }
+
+  get inner(): IError {
+    return this.#inner;
   }
 
   get name(): string {
@@ -71,11 +77,23 @@ export class Http extends Error {
     return this.#inner[key];
   }
 
+  set(key: string, value: unknown) {
+    this.#inner[key] = value;
+  }
+
   toString() {
-    if (this.expose) {
-      return JSON.stringify(this.#inner);
-    }
     return `${this.name} [${this.status}]: ${this.message}`;
+  }
+
+  toJSON() {
+    if (this.expose) {
+      return { ...this.#inner };
+    }
+    return {
+      name: this.name,
+      status: this.status,
+      message: this.message,
+    };
   }
 
   toResponse(expose?: boolean): Response {
